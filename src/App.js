@@ -1,29 +1,62 @@
 import React,{useEffect, useState} from 'react';
 import './App.css';
+import Recipe from './Recipe';
 
 const App = () => {
 
   const APP_ID = "e82fe8ea";
   const APP_KEY = "cc6e54ca8aab31ab6ad0bc24a041feb7";
 
-  // eslint-disable-next-line no-unused-vars
-  const exampleReq = `https://api.edamam.com/search?q=chicken&app_id=${APP_ID}&app_key=${APP_KEY}`;
+  const [recipes, setRecipes] = useState([]);
+  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState('chicken');
 
-  const [counter, setCounter] = useState(0);
 
   useEffect(() => {
 
-    console.log('Effects has been run')
-  }, []);
+    getRecipes();
+    
+  }, [query]);
+
+  const getRecipes = async () => {
+
+    const response = await fetch(`https://api.edamam.com/search?q=${query}&app_id=${APP_ID}&app_key=${APP_KEY}`);
+    const data = await response.json();
+    setRecipes(data.hits);
+    console.log(data.hits);
+
+  };
+
+  const updateSearch = e => {
+
+    setSearch(e.target.value);
+    
+  }
+
+  const getSearch = e => {
+
+    e.preventDefault();
+    setQuery(search);
+    setSearch("");
+
+  }
 
 
   return (
    <div className="App">
-  <form className="search-form">
-    <input className="search-bar" type="text"/>
+  <form onSubmit={getSearch} className="search-form">
+    <input className="search-bar" type="text" value={search} onChange={updateSearch} />
     <button  className="search-button" type="submit">Search</button>
   </form>
-  <h1 onClick={() => setCounter(counter+1)}>{counter}</h1>
+  {recipes.map(recipe => (
+    <Recipe 
+    key={recipe.recipe.label}
+    title={recipe.recipe.label}
+    calories={recipe.recipe.calories}
+    image={recipe.recipe.image}
+    ingredients={recipe.recipe.ingredients}
+    />
+  ))};
    </div>
   );
 
